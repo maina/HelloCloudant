@@ -35,7 +35,7 @@ public class PullPushService {
     private Datastore mDatastore;
     private static final String LOG_TAG = "PullPushService";
     DatastoreManager manager;
-    private final String dbURL="http://27.147.129.61:5984/opensrp",dataStore="opensrp";
+    private final String dbURL="http://<YOUR_IP>:5984/cloudanttest",dataStore="cloudanttest";
 
     public PullPushService(Context context) {
 
