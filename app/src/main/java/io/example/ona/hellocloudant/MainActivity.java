@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.PullPushService;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -26,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        PullPushService pullPushService= new PullPushService(this);
+        try {
+            pullPushService.pull();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
