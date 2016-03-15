@@ -3,11 +3,13 @@ package io.example.ona.hellocloudant.io.example.ona.hellocloudant.services;
 /**
  * Created by onamacuser on 11/03/2016.
  */
-import com.google.common.eventbus.Subscribe;
-import java.util.concurrent.CountDownLatch;
+
 import com.cloudant.sync.notifications.ReplicationCompleted;
 import com.cloudant.sync.notifications.ReplicationErrored;
 import com.cloudant.sync.replication.ErrorInfo;
+import com.google.common.eventbus.Subscribe;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@code ReplicationListener} that sets a latch when it's told the

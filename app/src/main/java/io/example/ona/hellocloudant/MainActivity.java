@@ -5,13 +5,22 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.PullPushService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.Connector;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.ConnectorCallback;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.PullPushService;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.QueryService;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.ServiceUtils;
+
+public class MainActivity extends AppCompatActivity implements ConnectorCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +37,31 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        PullPushService pullPushService= new PullPushService(this);
+//        PullPushService pullPushService= new PullPushService(this);
+//        try {
+//            pullPushService.pull();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        QueryService pullPushService= new QueryService(this);
+//        try {
+//            pullPushService.getClients();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        try {
+//            new Connector(this).run();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         try {
-            pullPushService.pull();
+            Map<String, String> params = new HashMap();
+            params.put("type", "Event");
+            params.put("locationId", "korangi");
+
+           PullPushService pullPushService= new PullPushService(this);
+            pullPushService.filteredPull(params);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,5 +87,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void callback(String dname) {
+        Log.d("",dname);
+    }
+
+    @Override
+    public void listdbs(List<String> dbs) {
+        Log.d("",dbs.get(0));
+
     }
 }

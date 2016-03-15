@@ -1,32 +1,23 @@
 package io.example.ona.hellocloudant.io.example.ona.hellocloudant.services;
 
-/**
- * Created by onamacuser on 11/03/2016.
- */
-
 import android.content.Context;
 import android.util.Log;
 
-import com.cloudant.sync.replication.ReplicatorBuilder;
-import com.cloudant.sync.replication.Replicator;
-import com.cloudant.sync.datastore.BasicDocumentRevision;
-import com.cloudant.sync.datastore.ConflictException;
 import com.cloudant.sync.datastore.Datastore;
 import com.cloudant.sync.datastore.DatastoreManager;
 import com.cloudant.sync.datastore.DatastoreNotCreatedException;
-import com.cloudant.sync.datastore.DocumentBodyFactory;
-import com.cloudant.sync.datastore.DocumentException;
-import com.cloudant.sync.datastore.MutableDocumentRevision;
-import com.cloudant.sync.notifications.ReplicationCompleted;
-import com.cloudant.sync.notifications.ReplicationErrored;
+import com.cloudant.sync.replication.PullFilter;
 import com.cloudant.sync.replication.Replicator;
 import com.cloudant.sync.replication.ReplicatorBuilder;
-import com.google.common.eventbus.Subscribe;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+/**
+ * Created by onamacuser on 11/03/2016.
+ */
 
 public class PullPushService {
     private final Context mContext;
@@ -35,7 +26,7 @@ public class PullPushService {
     private Datastore mDatastore;
     private static final String LOG_TAG = "PullPushService";
     DatastoreManager manager;
-    private final String dbURL="http://<YOUR_IP>:5984/cloudanttest",dataStore="cloudanttest";
+    private final String dbURL = "http://<YOUR_IP>/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
 
     public PullPushService(Context context) {
 
@@ -150,5 +141,39 @@ public class PullPushService {
             System.out.println("Error replicating TO remote");
             System.out.println(listener.error);
         }
+    }
+
+    public void filteredPull(Map<String, String> filterParams) throws Exception {
+        //SERVER side filter definition
+//        {
+//            "_id": "_design/myfilter",
+//                "_rev": "2-df256e589a6f16d635ddf4b575fbb006",
+//                "filters": {
+//            "samplefilter": "function(doc, req){if (doc.type != req.query.type){return false;}if (doc.locationId != req.query.locationId){return false;}return true;}"
+//        }
+//        }
+        PullFilter filter = new PullFilter("myfilter/samplefilter", filterParams);
+        Replicator replicator = ReplicatorBuilder.pull()
+                .from(this.getURI())
+                .to(this.getDatastore())
+                .filter(filter)
+                .build();
+        replicator.start();
+        if (replicator.getState() != Replicator.State.COMPLETE) {
+            System.out.println("Error replicating FROM remote");
+        }
+        Log.d("TAG","DONE");
+
+       // function(doc) { if(doc.type && doc.type == 'Event' && doc.locationId&& doc.locationId=='korangi') { emit(null, { 'id': doc._id }); }  }
+    }
+
+    URI getURI() throws Exception {
+        URI uri = new URI(dbURL);
+        return uri;
+    }
+
+    Datastore getDatastore() throws Exception {
+        Datastore ds = manager.openDatastore(dataStore);
+        return ds;
     }
 }
