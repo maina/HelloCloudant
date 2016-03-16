@@ -43,13 +43,8 @@ public class MainActivity extends AppCompatActivity implements ConnectorCallback
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-//        QueryService pullPushService= new QueryService(this);
-//        try {
-//            pullPushService.getClients();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
+//
 //        try {
 //            new Connector(this).run();
 //        } catch (Exception e) {
@@ -57,11 +52,16 @@ public class MainActivity extends AppCompatActivity implements ConnectorCallback
 //        }
         try {
             Map<String, String> params = new HashMap();
-            params.put("type", "Event");
-            params.put("locationId", "korangi");
+
 
            PullPushService pullPushService= new PullPushService(this);
-            pullPushService.filteredPull(params);
+           pullPushService.filteredPull(params);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        QueryService queryService= new QueryService(this);
+        try {
+            queryService.getUpdatedDocs();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -17,6 +17,9 @@ import com.cloudant.sync.datastore.DatastoreNotCreatedException;
 import com.cloudant.sync.query.IndexManager;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -28,10 +31,10 @@ import java.util.concurrent.CountDownLatch;
 public class QueryService {
     private final Context mContext;
     private static final String DATASTORE_MANGER_DIR = "data";
-   private Datastore mDatastore;
+    private Datastore mDatastore;
     private static final String LOG_TAG = "PullPushService";
     DatastoreManager manager;
-    private final String dbURL = "http://46.101.51.199:5984/opensrp_devtest", dataStore = "opensrp_devtest2";
+    private final String dbURL = "http://<YOUR_IP>:5984/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
 
     public QueryService(Context context) {
 
@@ -56,11 +59,9 @@ public class QueryService {
     private CountDownLatch latch = null;
 
 
-
     public void getClients() throws Exception {
         Datastore ds = manager.openDatastore(dataStore);
         IndexManager im = new IndexManager(ds);
-
 
 
         Map<String, Object> query = new HashMap<String, Object>();
@@ -70,8 +71,8 @@ public class QueryService {
 
         for (DocumentRevision rev : result) {
             DocumentBody doc = rev.getBody();
-            Map<String,Object> map = doc.asMap();
-            if(map.containsKey("type") && map.get("type").equals("Alert")) {
+            Map<String, Object> map = doc.asMap();
+            if (map.containsKey("type") && map.get("type").equals("Alert")) {
                 Log.d("ID", String.valueOf(map.get("type")));
                 Log.d("TYPE", String.valueOf(map.get("entityId")));
             }
@@ -80,5 +81,33 @@ public class QueryService {
             // the object. You cannot project certain fields in the
             // current implementation.
         }
+    }
+
+    public void getUpdatedDocs() throws Exception {
+        Datastore ds = manager.openDatastore(dataStore);
+        IndexManager im = new IndexManager(ds);
+        DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+
+        Date lastSyncDate = df.parse("12-03-2016 12:00:00");
+// query: { "timestamp": { "$gt": 12 } }
+        Map<String, Object> query = new HashMap<String, Object>();
+        Map<String, Object> gttimestamp = new HashMap<String, Object>();
+        long timestamp = lastSyncDate.getTime();
+
+        gttimestamp.put("$gt", timestamp);
+        query.put("timestamp", gttimestamp);
+
+        QueryResult result = im.find(query);
+//        int size = result.size();
+//        Log.d("TAG", "" + size);
+
+        for (DocumentRevision rev : result) {
+            DocumentBody doc = rev.getBody();
+            Map<String, Object> map = doc.asMap();
+            if (map.containsKey("providerId") && map.get("providerId").toString().equalsIgnoreCase("demoprovideridtimestamp")) {
+                Log.d("TIMESTAMP", String.valueOf(map.get("timestamp")));
+            }
+        }
+
     }
 }

@@ -26,7 +26,7 @@ public class PullPushService {
     private Datastore mDatastore;
     private static final String LOG_TAG = "PullPushService";
     DatastoreManager manager;
-    private final String dbURL = "http://<YOUR_IP>/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
+    private final String dbURL = "http://<YOUR_IP>:5984/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
 
     public PullPushService(Context context) {
 
@@ -152,13 +152,14 @@ public class PullPushService {
 //            "samplefilter": "function(doc, req){if (doc.type != req.query.type){return false;}if (doc.locationId != req.query.locationId){return false;}return true;}"
 //        }
 //        }
-        PullFilter filter = new PullFilter("myfilter/samplefilter", filterParams);
+        PullFilter filter = new PullFilter("myfilter/sampletimestampfilter", filterParams);
         Replicator replicator = ReplicatorBuilder.pull()
                 .from(this.getURI())
                 .to(this.getDatastore())
                 .filter(filter)
                 .build();
         replicator.start();
+
         if (replicator.getState() != Replicator.State.COMPLETE) {
             System.out.println("Error replicating FROM remote");
         }
