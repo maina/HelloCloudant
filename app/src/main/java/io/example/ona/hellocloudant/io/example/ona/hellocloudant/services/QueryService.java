@@ -31,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 public class QueryService {
     private final Context mContext;
     private static final String DATASTORE_MANGER_DIR = "data";
-    private Datastore mDatastore;
     private static final String LOG_TAG = "PullPushService";
     DatastoreManager manager;
     private final String dbURL = "http://<YOUR_IP>:5984/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
@@ -46,13 +45,11 @@ public class QueryService {
                 DATASTORE_MANGER_DIR,
                 Context.MODE_PRIVATE
         );
-        manager = new DatastoreManager(path.getAbsolutePath());
-        try {
-            this.mDatastore = manager.openDatastore(dataStore);
-        } catch (DatastoreNotCreatedException dnce) {
-            Log.e(LOG_TAG, "Unable to open Datastore", dnce);
-        }
 
+        manager = new DatastoreManager(path.getAbsolutePath());
+
+
+        Listener listener = new Listener(latch,this.mContext,path.getAbsolutePath()+File.separator+dataStore+File.separator+"db.sync" );
         Log.d(LOG_TAG, "Set up database at " + path.getAbsolutePath());
     }
 
@@ -88,14 +85,14 @@ public class QueryService {
         IndexManager im = new IndexManager(ds);
         DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
 
-        Date lastSyncDate = df.parse("12-03-2016 12:00:00");
+        Date lastSyncDate = df.parse("09-03-2016 12:00:00");
 // query: { "timestamp": { "$gt": 12 } }
         Map<String, Object> query = new HashMap<String, Object>();
         Map<String, Object> gttimestamp = new HashMap<String, Object>();
         long timestamp = lastSyncDate.getTime();
 
-        gttimestamp.put("$gt", timestamp);
-        query.put("timestamp", gttimestamp);
+        gttimestamp.put("$gt", "2016-03-16 09:37:46");
+        query.put("providerId", "demotest");
 
         QueryResult result = im.find(query);
 //        int size = result.size();

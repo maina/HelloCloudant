@@ -28,7 +28,7 @@ public class PullPushService {
     DatastoreManager manager;
     private final String dbURL = "http://<YOUR_IP>:5984/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
 
-    public PullPushService(Context context) {
+    public PullPushService(Context context) throws  Exception{
 
         this.mContext = context;
 
@@ -39,11 +39,12 @@ public class PullPushService {
                 Context.MODE_PRIVATE
         );
         manager = new DatastoreManager(path.getAbsolutePath());
-        try {
-            this.mDatastore = manager.openDatastore(TASKS_DATASTORE_NAME);
-        } catch (DatastoreNotCreatedException dnce) {
-            Log.e(LOG_TAG, "Unable to open Datastore", dnce);
-        }
+
+            latch = new CountDownLatch(1);
+        Listener listener = new Listener(latch,this.mContext,path.getAbsolutePath()+File.separator+dataStore+File.separator+"db.sync" );
+            manager.getEventBus().register(listener);
+
+        Datastore ds = manager.openDatastore(dataStore);
 
         Log.d(LOG_TAG, "Set up database at " + path.getAbsolutePath());
     }
@@ -64,7 +65,7 @@ public class PullPushService {
 
 // Use a CountDownLatch to provide a lightweight way to wait for completion
         CountDownLatch latch = new CountDownLatch(1);
-        Listener listener = new Listener(latch);
+        Listener listener = new Listener(latch,this.mContext);
         replicator.getEventBus().register(listener);
         replicator.start();
         latch.await();
@@ -91,7 +92,7 @@ public class PullPushService {
 
 // Use a CountDownLatch to provide a lightweight way to wait for completion
         CountDownLatch latch = new CountDownLatch(1);
-        Listener listener = new Listener(latch);
+        Listener listener = new Listener(latch,this.mContext );
         replicator.getEventBus().register(listener);
         replicator.start();
         latch.await();
@@ -116,7 +117,7 @@ public class PullPushService {
 
 // Use a latch starting at 2 as we're waiting for two replications to finish
         latch = new CountDownLatch(2);
-        Listener listener = new Listener(latch);
+        Listener listener = new Listener(latch,this.mContext );
 
 // Set the listener and start for both pull and push replications
         pullReplicator.getEventBus().register(listener);
@@ -152,12 +153,15 @@ public class PullPushService {
 //            "samplefilter": "function(doc, req){if (doc.type != req.query.type){return false;}if (doc.locationId != req.query.locationId){return false;}return true;}"
 //        }
 //        }
+
+
         PullFilter filter = new PullFilter("myfilter/sampletimestampfilter", filterParams);
         Replicator replicator = ReplicatorBuilder.pull()
                 .from(this.getURI())
                 .to(this.getDatastore())
                 .filter(filter)
                 .build();
+
         replicator.start();
 
         if (replicator.getState() != Replicator.State.COMPLETE) {
