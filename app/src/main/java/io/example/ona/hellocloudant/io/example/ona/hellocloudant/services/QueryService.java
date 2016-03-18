@@ -5,16 +5,10 @@ import android.util.Log;
 
 import com.cloudant.sync.datastore.Datastore;
 import com.cloudant.sync.datastore.DatastoreManager;
-import com.cloudant.sync.datastore.DatastoreNotCreatedException;
 import com.cloudant.sync.datastore.DocumentBody;
 import com.cloudant.sync.datastore.DocumentRevision;
 import com.cloudant.sync.query.IndexManager;
 import com.cloudant.sync.query.QueryResult;
-
-import com.cloudant.sync.datastore.Datastore;
-import com.cloudant.sync.datastore.DatastoreManager;
-import com.cloudant.sync.datastore.DatastoreNotCreatedException;
-import com.cloudant.sync.query.IndexManager;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -28,43 +22,24 @@ import java.util.concurrent.CountDownLatch;
  * Created by onamacuser on 11/03/2016.
  */
 
-public class QueryService {
-    private final Context mContext;
-    private static final String DATASTORE_MANGER_DIR = "data";
-    private static final String LOG_TAG = "PullPushService";
-    DatastoreManager manager;
-    private final String dbURL = "http://<YOUR_IP>:5984/opensrp_devtest", dataStore = "opensrp_devtest_filteredpull";
+public class QueryService extends ReplicationService {
+    private static final String TAG = QueryService.class.getCanonicalName();
 
-    public QueryService(Context context) {
+    public QueryService(Context context, ReplicationListenerCallback _callback) throws Exception {
 
-        this.mContext = context;
-
-        // Set up our tasks datastore within its own folder in the applications
-        // data directory.
-        File path = this.mContext.getApplicationContext().getDir(
-                DATASTORE_MANGER_DIR,
-                Context.MODE_PRIVATE
-        );
-
-        manager = new DatastoreManager(path.getAbsolutePath());
-
-
-        Listener listener = new Listener(latch,this.mContext,path.getAbsolutePath()+File.separator+dataStore+File.separator+"db.sync" );
-        Log.d(LOG_TAG, "Set up database at " + path.getAbsolutePath());
+        super(context, _callback);
     }
 
     private CountDownLatch latch = null;
 
 
     public void getClients() throws Exception {
-        Datastore ds = manager.openDatastore(dataStore);
-        IndexManager im = new IndexManager(ds);
 
 
         Map<String, Object> query = new HashMap<String, Object>();
-        query.put("type", "Alert");
+        query.put("type", "Client");
 
-        QueryResult result = im.find(query);
+        QueryResult result = indexManager.find(query);
 
         for (DocumentRevision rev : result) {
             DocumentBody doc = rev.getBody();
@@ -81,8 +56,6 @@ public class QueryService {
     }
 
     public void getUpdatedDocs() throws Exception {
-        Datastore ds = manager.openDatastore(dataStore);
-        IndexManager im = new IndexManager(ds);
         DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
 
         Date lastSyncDate = df.parse("09-03-2016 12:00:00");
@@ -94,7 +67,7 @@ public class QueryService {
         gttimestamp.put("$gt", "2016-03-16 09:37:46");
         query.put("providerId", "demotest");
 
-        QueryResult result = im.find(query);
+        QueryResult result = indexManager.find(query);
 //        int size = result.size();
 //        Log.d("TAG", "" + size);
 

@@ -1,7 +1,6 @@
 package io.example.ona.hellocloudant;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -16,20 +15,18 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.cloudant.sync.replication.ErrorInfo;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.Connector;
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.ConnectorCallback;
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.DatabaseHandler;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.Constants;
+import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.ReplicationListenerCallback;
 import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.PullPushService;
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.QueryService;
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.ServiceUtils;
-import io.example.ona.hellocloudant.io.example.ona.hellocloudant.services.TimeChangeBroadcastReceiver;
 
-public class MainActivity extends AppCompatActivity implements ConnectorCallback {
-    BroadcastReceiver mReceiver;
+public class MainActivity extends BaseActivity  {
+    private static final String TAG=MainActivity.class.getCanonicalName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,43 +44,36 @@ public class MainActivity extends AppCompatActivity implements ConnectorCallback
                             .setAction("Action", null).show();
                 }
             });
-//        PullPushService pullPushService= new PullPushService(this);
-//        try {
-//            pullPushService.pull();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
+
+
+//CLOUDANT SQLITE DB ACCESS
+
+            String selectQuery = "SELECT  current,deleted,json,updated_at FROM revs where sequence=1'";
+
+//            SQLiteDatabase db = ((HelloCloudantApplication) this.getApplication()).getCloudantDB();
+//            if(db==null){
+//                loadDatabase();
+//            }
+//             db = ((HelloCloudantApplication) this.getApplication()).getCloudantDB();
+//            Cursor cursor = db.rawQuery(selectQuery, null);
 //
-//        try {
-//            new Connector(this).run();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-            Map<String, String> params = new HashMap();
-
-
-          PullPushService pullPushService = new PullPushService(this);
-           pullPushService.filteredPull(params);
-
-            String selectQuery = "SELECT  current,deleted,json,updated_at FROM revs where updated_at>'2016-03-17 14:25:13'";
-
-            SQLiteDatabase db = ServiceUtils.getDB();
-            Cursor cursor = db.rawQuery(selectQuery, null);
-
-            // looping through all rows and adding to list
-            if (cursor.moveToFirst()) {
-                do {
-
-                    Integer current=(Integer.parseInt(cursor.getString(0)));
-                    Integer deleted=(Integer.parseInt(cursor.getString(1)));
-                    byte[] json=(cursor.getBlob(2));
-                    String jsonString= new String(json, "UTF-8");
-                    String updatedat=(cursor.getString(3));
-
-                } while (cursor.moveToNext());
-            }
+//            // looping through all rows and adding to list
+//            if (cursor.moveToFirst()) {
+//                do {
+//
+//                    Integer current = (Integer.parseInt(cursor.getString(0)));
+//                    Log.d(TAG,"CURRENT "+current);
+//                    Integer deleted = (Integer.parseInt(cursor.getString(1)));
+//                    Log.d(TAG,"DELETED "+deleted);
+//                    byte[] json = (cursor.getBlob(2));
+//                    String jsonString = new String(json, "UTF-8");
+//                    Log.d(TAG,"JSON "+jsonString);
+//                    String updatedat = (cursor.getString(3));
+//                    Log.d(TAG,"UPDATED AT "+updatedat);
+//
+//                } while (cursor.moveToNext());
+//            }
 //            QueryService queryService = new QueryService(this);
 //
 //            queryService.getUpdatedDocs();
@@ -115,31 +105,16 @@ public class MainActivity extends AppCompatActivity implements ConnectorCallback
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void callback(String dname) {
-        Log.d("", dname);
-    }
-
-    @Override
-    public void listdbs(List<String> dbs) {
-        Log.d("", dbs.get(0));
-
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter(
-                "android.intent.action.TIMEZONE_CHANGED");
-        intentFilter.addAction("android.intent.action.TIME_SET");
-        mReceiver = new TimeChangeBroadcastReceiver();
-        //registering our receiver
-        this.registerReceiver(mReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mReceiver.getDebugUnregister();
     }
+
+
 }
