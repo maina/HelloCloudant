@@ -41,19 +41,20 @@ public class BaseActivity extends AppCompatActivity implements ReplicationListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(helloCloudantBroadcastReceiver);
     }
 
     private void setupReplicationBroadcastReceiver() {
         // The filter's action is BROADCAST_ACTION
-        IntentFilter replicationIntentFilter = new IntentFilter(Constants.Replication.ACTION_DATABASE_CREATED);
-        replicationIntentFilter.addAction(Constants.Replication.ACTION_REPLICATION_COMPLETED);
-        replicationIntentFilter.addAction(Constants.Replication.ACTION_REPLICATION_ERROR);
-        replicationIntentFilter.addAction("android.intent.action.TIMEZONE_CHANGED");
-        replicationIntentFilter.addAction("android.intent.action.TIME_SET");
+        IntentFilter helloCloudantIntentFilter = new IntentFilter(Constants.Replication.ACTION_DATABASE_CREATED);
+        helloCloudantIntentFilter.addAction(Constants.Replication.ACTION_REPLICATION_COMPLETED);
+        helloCloudantIntentFilter.addAction(Constants.Replication.ACTION_REPLICATION_ERROR);
+        helloCloudantIntentFilter.addAction("android.intent.action.TIMEZONE_CHANGED");
+        helloCloudantIntentFilter.addAction("android.intent.action.TIME_SET");
         // Instantiates a new DownloadStateReceiver
         helloCloudantBroadcastReceiver = new HelloCloudantBroadcastReceiver(this);
         // Registers the DownloadStateReceiver and its intent filters
-        LocalBroadcastManager.getInstance(this).registerReceiver(helloCloudantBroadcastReceiver, replicationIntentFilter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(helloCloudantBroadcastReceiver, helloCloudantIntentFilter);
     }
     @Override
     public void replicationCompleted(int documentsReplicated, int batchesReplicated) {
@@ -89,4 +90,5 @@ public class BaseActivity extends AppCompatActivity implements ReplicationListen
     public void showToast(String msg){
         Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
     }
+
 }
