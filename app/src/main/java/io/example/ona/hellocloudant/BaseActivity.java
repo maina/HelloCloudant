@@ -84,7 +84,7 @@ public class BaseActivity extends AppCompatActivity implements ReplicationListen
 
 
         } catch (Exception e) {
-            Log.e("ERROR", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
     }
     public void showToast(String msg){

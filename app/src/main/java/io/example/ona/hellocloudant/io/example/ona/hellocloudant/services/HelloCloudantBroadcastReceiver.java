@@ -26,9 +26,11 @@ public class HelloCloudantBroadcastReceiver extends BroadcastReceiver {
             String action = intent.getAction();
 
             if (action.equals(Intent.ACTION_TIME_CHANGED)) {
-                Log.d("TAG", "TimeChange");
+                ((BaseActivity) activity).showToast("TIME CHANGED");
+                Log.d("TimeChange","timechanged");
             } else if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
-                Log.d("TAG", "TimeZoneChanged");
+                ((BaseActivity) activity).showToast("TIMEZONE CHANGED");
+                Log.d("TimeChange", "timezonechanged");
             } else if (action.equals(Constants.Replication.ACTION_DATABASE_CREATED)) {
                 ((BaseActivity) activity).loadDatabase();
             } else if (action.equals(Constants.Replication.ACTION_REPLICATION_COMPLETED)) {
